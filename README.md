@@ -62,7 +62,10 @@ Python-зависимости отсутствуют — скрипт испол
 
 ### 1. R и R-пакеты
 
-#### Установка R (Debian / Ubuntu)
+#### Установка R
+
+<details>
+<summary>🐧 Linux (Debian / Ubuntu)</summary>
 
 ```bash
 sudo apt update
@@ -76,9 +79,33 @@ R --version
 # R version 4.x.x (2024-...) ...
 ```
 
+</details>
+
+<details>
+<summary>🪟 Windows</summary>
+
+1. Скачайте установщик с [cran.r-project.org](https://cran.r-project.org/bin/windows/base/)
+2. Запустите `.exe` и установите с настройками по умолчанию
+3. Убедитесь, что в процессе установки отмечена опция **«Add R to PATH»**
+
+Проверьте версию в PowerShell или CMD:
+
+```cmd
+R --version
+```
+
+</details>
+
+---
+
 #### Установка R-пакетов
 
-Запустите R от имени пользователя (не root):
+> **Первая установка занимает 2–5 минут.** При вопросе «хотите обновить другие пакеты?» можно ответить `n`.
+
+<details>
+<summary>🐧 Linux</summary>
+
+Запустите от имени пользователя (не root):
 
 ```bash
 Rscript -e 'install.packages(
@@ -87,13 +114,26 @@ Rscript -e 'install.packages(
 )'
 ```
 
-> **Первая установка занимает 2–5 минут** — пакеты компилируются из
-> исходников. При вопросе «хотите обновить другие пакеты?» можно ответить `n`.
+</details>
+
+<details>
+<summary>🪟 Windows</summary>
+
+Запустите в PowerShell или CMD:
+
+```cmd
+Rscript -e "install.packages(c('fedstatAPIr', 'data.table', 'jsonlite'), repos='https://cloud.r-project.org')"
+```
+
+> На Windows используйте внешние двойные кавычки и внутренние одинарные —
+> иначе PowerShell/CMD сломает строку.
+
+</details>
 
 Проверьте, что пакеты установлены:
 
 ```bash
-Rscript -e 'library(fedstatAPIr); library(data.table); library(jsonlite); cat("OK\n")'
+Rscript -e "library(fedstatAPIr); library(data.table); library(jsonlite); cat('OK\n')"
 # OK
 ```
 
@@ -102,8 +142,10 @@ Rscript -e 'library(fedstatAPIr); library(data.table); library(jsonlite); cat("O
 Пакет может распространяться только через GitHub:
 
 ```bash
-Rscript -e 'install.packages("remotes"); remotes::install_github("finabr/fedstatAPIr")'
+Rscript -e "install.packages('remotes'); remotes::install_github('finabr/fedstatAPIr')"
 ```
+
+---
 
 ### 2. Python
 
@@ -111,7 +153,8 @@ Rscript -e 'install.packages("remotes"); remotes::install_github("finabr/fedstat
 Никакой виртуальной среды не требуется — скопируйте `emiss_download.py`
 в рабочую папку и запускайте напрямую.
 
-Проверьте версию Python:
+<details>
+<summary>🐧 Linux</summary>
 
 ```bash
 python3 --version
@@ -120,13 +163,44 @@ python3 --version
 
 > Если на системе несколько Python — используйте явно `python3`, не `python`.
 
+</details>
+
+<details>
+<summary>🪟 Windows</summary>
+
+```cmd
+python --version
+```
+
+> На Windows команда обычно `python`, не `python3`.
+> Скачать Python можно с [python.org](https://www.python.org/downloads/).
+> При установке отметьте **«Add Python to PATH»**.
+
+</details>
+
+---
+
 ### 3. Проверка установки
 
-Быстрый тест: посмотрите фильтры любого индикатора (сеть не нужна, только R):
+Быстрый тест: посмотрите фильтры любого индикатора:
+
+<details>
+<summary>🐧 Linux</summary>
 
 ```bash
 python3 emiss_download.py 62309 --list-filters
 ```
+
+</details>
+
+<details>
+<summary>🪟 Windows</summary>
+
+```cmd
+python emiss_download.py 62309 --list-filters
+```
+
+</details>
 
 Ожидаемый вывод:
 
@@ -144,6 +218,7 @@ python3 emiss_download.py 62309 --list-filters
   2021
   ...
 ```
+
 
 ---
 
