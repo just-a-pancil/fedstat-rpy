@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ЕМИСС — Конфигуратор</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f7f6f2;--surface:#fff;--border:#d4d1ca;--divider:#e8e6e1;
+  --text:#28251d;--muted:#7a7974;--faint:#bab9b4;
+  --primary:#01696f;--primary-h:#0c4e54;--primary-hl:#cedcd8;
+  --r:8px;--rsm:5px;--shadow:0 2px 8px rgba(0,0,0,.07);
+}
+body{font-family:system-ui,sans-serif;background:var(--bg);color:var(--text);
+     min-height:100vh;padding:24px 16px;font-size:14px}
+.app{max-width:1040px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+.card{background:var(--surface);border:1px solid var(--border);
+      border-radius:var(--r);padding:20px;box-shadow:var(--shadow)}
+.card-title{font-size:11px;font-weight:700;letter-spacing:.08em;
+            color:var(--muted);text-transform:uppercase;margin-bottom:14px}
+input[type=number]{border:1px solid var(--border);border-radius:var(--rsm);
+  padding:7px 10px;font-size:14px;background:var(--bg);color:var(--text);outline:none}
+input[type=number]:focus{border-color:var(--primary)}
+input[type=text]{border:1px solid var(--border);border-radius:var(--rsm);
+  padding:6px 10px;font-size:13px;background:var(--bg);color:var(--text);
+  outline:none;width:100%}
+input[type=text]:focus{border-color:var(--primary)}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;
+     border-radius:var(--rsm);border:none;cursor:pointer;
+     font-size:13px;font-weight:500;transition:background .15s,opacity .15s}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-primary:hover:not(:disabled){background:var(--primary-h)}
+.btn-outline{background:transparent;color:var(--text);border:1px solid var(--border)}
+.btn-outline:hover:not(:disabled){background:var(--divider)}
+.btn-success{background:#437a22;color:#fff}
+.btn-success:hover:not(:disabled){background:#2e5c10}
+.status{padding:9px 12px;border-radius:var(--rsm);font-size:13px;margin-top:12px}
+.s-ok{background:#d4dfcc;color:#1e3f0a}
+.s-err{background:#e0ced7;color:#561740}
+.s-info{background:var(--primary-hl);color:var(--primary-h)}
+.row{display:flex;gap:16px;align-items:flex-end;flex-wrap:wrap}
+.fg{display:flex;flex-direction:column;gap:5px}
+.fg label{font-size:12px;color:var(--muted)}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.chip{padding:4px 12px;border-radius:20px;border:1px solid var(--border);
+      font-size:12px;cursor:pointer;background:var(--bg);transition:background .12s}
+.chip:hover{background:var(--primary-hl);border-color:var(--primary)}
+.fh{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.fgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:12px}
+.fbox{border:1px solid var(--border);border-radius:var(--rsm);
+      display:flex;flex-direction:column;max-height:300px;overflow:hidden}
+.fbox-head{padding:8px 10px;background:var(--bg);border-bottom:1px solid var(--divider);
+           display:flex;align-items:center;gap:6px;flex-shrink:0}
+.fbox-title{font-size:12px;font-weight:600;flex:1;
+            white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fbox-cnt{font-size:11px;color:var(--muted);white-space:nowrap}
+.fbox-all{font-size:11px;color:var(--primary);cursor:pointer;
+          border:none;background:none;padding:2px 4px;flex-shrink:0}
+.fbox-all:hover{text-decoration:underline}
+.fsearch{padding:6px 8px;border-bottom:1px solid var(--divider);flex-shrink:0}
+.fsearch input{border:1px solid var(--border);border-radius:var(--rsm);
+  padding:5px 8px;font-size:12px;background:var(--bg);color:var(--text);
+  outline:none;width:100%}
+.fsearch input:focus{border-color:var(--primary)}
+.flist{overflow-y:auto;flex:1}
+.fitem{display:flex;align-items:center;gap:8px;padding:5px 10px;cursor:pointer}
+.fitem:hover{background:var(--divider)}
+.fitem input[type=checkbox]{accent-color:var(--primary);width:14px;height:14px;
+                             flex-shrink:0;cursor:pointer}
+.fitem-lbl{font-size:12px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fitem-id{font-size:11px;color:var(--faint);flex-shrink:0;margin-left:4px}
+.export-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.json-panel{display:none;margin-top:12px}
+.json-panel.open{display:block}
+.json-panel pre{background:#1c1b19;color:#cdccca;padding:14px;
+                border-radius:var(--rsm);font-size:12px;
+                overflow:auto;max-height:320px;white-space:pre-wrap}
+.spinner{display:inline-block;width:14px;height:14px;
+         border:2px solid rgba(255,255,255,.4);border-top-color:#fff;
+         border-radius:50%;animation:spin .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.35);
+          display:flex;align-items:center;justify-content:center;
+          z-index:100;opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-bg.open{opacity:1;pointer-events:all}
+.modal{background:var(--surface);border-radius:var(--r);padding:24px;
+       width:340px;box-shadow:0 8px 32px rgba(0,0,0,.18)}
+.modal h3{font-size:15px;margin-bottom:14px}
+.modal-actions{display:flex;gap:8px;margin-top:16px;justify-content:flex-end}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- Индикатор -->
+<div class="card">
+  <div class="card-title">Индикатор ЕМИСС</div>
+  <div class="row">
+    <div class="fg">
+      <label for="indId">ID индикатора</label>
+      <input type="number" id="indId" value="62309" min="1" style="width:130px">
+    </div>
+    <button class="btn btn-primary" id="btnLoad">
+      ↓ Загрузить фильтры
+    </button>
+    <button class="btn btn-outline" id="btnRefresh">↺ Обновить</button>
+  </div>
+  <div id="statusBar" class="status s-info">Введите ID индикатора и нажмите «Загрузить фильтры»</div>
+</div>
+
+<!-- Период -->
+<div class="card">
+  <div class="card-title">Период <span style="font-size:11px;font-weight:400;color:var(--muted);text-transform:none;letter-spacing:0">(управляет фильтром «Год»)</span></div>
+  <div class="row">
+    <div class="fg">
+      <label for="yearFrom">С года</label>
+      <input type="number" id="yearFrom" value="2024" min="2000" max="2030" style="width:110px">
+    </div>
+    <div class="fg">
+      <label for="yearTo">По год</label>
+      <input type="number" id="yearTo" value="2026" min="2000" max="2030" style="width:110px">
+    </div>
+  </div>
+  <div class="chips">
+    <div class="chip" data-from="2024" data-to="today">2024 — сейчас</div>
+    <div class="chip" data-from="2023" data-to="today">2023 — сейчас</div>
+    <div class="chip" data-from="2020" data-to="today">2020 — сейчас</div>
+    <div class="chip" data-from="2019" data-to="2023">2019–2023</div>
+    <div class="chip" data-from="2015" data-to="2019">2015–2019</div>
+    <div class="chip" data-from="2010" data-to="today">с 2010</div>
+  </div>
+</div>
+
+<!-- Фильтры -->
+<div class="card">
+  <div class="fh">
+    <div class="card-title" style="margin-bottom:0">
+      Фильтры
+      <span id="filterNote" style="font-size:11px;font-weight:400;color:var(--muted);text-transform:none;letter-spacing:0;margin-left:6px">(поле «Год» скрыто — управляется периодом)</span>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-outline" id="btnSelAll" style="font-size:12px;padding:5px 10px">Всё</button>
+      <button class="btn btn-outline" id="btnClrAll" style="font-size:12px;padding:5px 10px">Сброс</button>
+    </div>
+  </div>
+  <div class="fgrid" id="fgrid">
+    <div style="color:var(--faint);font-size:13px;padding:8px 0">Загрузите фильтры для индикатора</div>
+  </div>
+</div>
+
+<!-- Экспорт -->
+<div class="card">
+  <div class="card-title">Экспорт</div>
+  <div class="export-row">
+    <button class="btn btn-primary" id="btnDl" disabled>↓ Скачать CSV</button>
+    <button class="btn btn-outline" id="btnCopy" disabled>📋 Копировать конфиг</button>
+    <button class="btn btn-outline" id="btnJson" disabled>{ } JSON</button>
+    <button class="btn btn-outline" id="btnSave" disabled>💾 Сохранить</button>
+  </div>
+  <div id="jsonPanel" class="json-panel"><pre id="jsonPre"></pre></div>
+</div>
+
+</div>
+
+<div class="modal-bg" id="modalBg">
+  <div class="modal">
+    <h3>Сохранить конфиг</h3>
+    <div class="fg">
+      <label>Имя файла (без .json)</label>
+      <input type="text" id="presetName" placeholder="config_62309">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" id="modalCancel">Отмена</button>
+      <button class="btn btn-success" id="modalOk">Сохранить</button>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+const API = 'http://127.0.0.1:8765';
+const esc = s => String(s == null ? '' : s)
+  .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const $id = id => document.getElementById(id);
+
+const YEAR_RE = /^(Год|год|Период|период)/;
+
+// indicatorData: { indicator_id, filters:[{field_title, values:[{id,title},...]},...] }
+let indicatorData = null;
+
+// filterStates: Map<idx:number, Set<title:string> | '*'>
+// idx — порядковый номер фильтра в indicatorData.filters (только не-год фильтры)
+const filterStates = new Map();
+
+// Карта: idx -> filter object (для обратного поиска)
+let visibleFilters = []; // [{idx, field_title, values:[]}]
+
+function setStatus(msg, type='info'){
+  const el = $id('statusBar');
+  el.textContent = msg;
+  el.className = 'status s-' + type;
+}
+function enableExport(on){
+  ['btnDl','btnCopy','btnJson','btnSave'].forEach(id => $id(id).disabled = !on);
+}
+
+// ── buildConfig ───────────────────────────────────────────────────────────────
+function buildConfig(){
+  if (!indicatorData) return null;
+  const yearFrom = parseInt($id('yearFrom').value) || 2024;
+  const yearToV  = parseInt($id('yearTo').value);
+  const yearTo   = isNaN(yearToV) ? 'today' : yearToV;
+
+  const filters = {};
+  for (const {idx, field_title} of visibleFilters){
+    const st = filterStates.get(idx);
+    filters[field_title] = { selected: (!st || st === '*') ? ['*'] : (st.size === 0 ? ['*'] : [...st]) };
+  }
+
+  return {
+    indicator_id: indicatorData.indicator_id,
+    period: { year_from: yearFrom, year_to: yearTo },
+    filters
+  };
+}
+
+// ── DOM id helpers — только числа, никакого русского ─────────────────────────
+const cntId  = idx => 'cnt-' + idx;
+const listId = idx => 'fl-'  + idx;
+
+// ── renderFilters ─────────────────────────────────────────────────────────────
+function renderFilters(data){
+  const grid = $id('fgrid');
+  grid.innerHTML = '';
+  filterStates.clear();
+  visibleFilters = [];
+
+  const all = data.filters || [];
+  let vi = 0;
+  for (let i = 0; i < all.length; i++){
+    const f = all[i];
+    if (YEAR_RE.test(f.field_title)) continue;
+
+    const idx = vi++;
+    visibleFilters.push({idx, field_title: f.field_title, values: f.values || []});
+    filterStates.set(idx, '*');
+
+    const total = (f.values || []).length;
+    const box   = document.createElement('div');
+    box.className = 'fbox';
+    box.dataset.idx = idx;
+
+    box.innerHTML =
+      '<div class="fbox-head">' +
+        '<span class="fbox-title" title="' + esc(f.field_title) + '">' + esc(f.field_title) + '</span>' +
+        '<span class="fbox-cnt" id="' + cntId(idx) + '">' + total + ' / ' + total + '</span>' +
+        '<button class="fbox-all" data-idx="' + idx + '">Все</button>' +
+      '</div>' +
+      '<div class="fsearch"><input type="text" placeholder="Поиск..." data-idx="' + idx + '" autocomplete="off"></div>' +
+      '<div class="flist" id="' + listId(idx) + '"></div>';
+
+    grid.appendChild(box);
+    buildList(idx, f.values || [], '');
+  }
+
+  if (!visibleFilters.length){
+    grid.innerHTML = '<div style="color:var(--faint);font-size:13px;padding:8px 0">Нет фильтров (кроме «Год»)</div>';
+  }
+}
+
+function buildList(idx, values, query){
+  const listEl = $id(listId(idx));
+  if (!listEl) return;
+
+  const st = filterStates.get(idx);
+  const q  = query.toLowerCase();
+
+  listEl.innerHTML = '';
+  for (const v of values){
+    if (q && !String(v.title).toLowerCase().includes(q)) continue;
+    const checked = (st === '*') || (st instanceof Set && st.has(v.title));
+
+    const lbl = document.createElement('label');
+    lbl.className = 'fitem';
+
+    const cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.dataset.idx = idx;
+    cb.dataset.val = v.title;
+    cb.checked = checked;
+    cb.addEventListener('change', onCheckbox);
+
+    const span = document.createElement('span');
+    span.className = 'fitem-lbl';
+    span.title = v.title;
+    span.textContent = v.title;
+
+    lbl.appendChild(cb);
+    lbl.appendChild(span);
+
+    if (v.id != null){
+      const sid = document.createElement('span');
+      sid.className = 'fitem-id';
+      sid.textContent = v.id;
+      lbl.appendChild(sid);
+    }
+
+    listEl.appendChild(lbl);
+  }
+  updateCnt(idx, values);
+}
+
+function updateCnt(idx, values){
+  const el = $id(cntId(idx));
+  if (!el) return;
+  const st  = filterStates.get(idx);
+  const cnt = st === '*' ? values.length : (st instanceof Set ? st.size : 0);
+  el.textContent = cnt + ' / ' + values.length;
+}
+
+function getVF(idx){ return visibleFilters.find(x => x.idx === idx); }
+
+// ── Checkbox change ───────────────────────────────────────────────────────────
+function onCheckbox(e){
+  const idx = parseInt(e.target.dataset.idx);
+  const val = e.target.dataset.val;
+  const vf  = getVF(idx);
+  if (!vf) return;
+  const all = vf.values.map(v => v.title);
+
+  let st = filterStates.get(idx);
+  if (st === '*' && !e.target.checked){
+    st = new Set(all.filter(t => t !== val));
+  } else {
+    if (!(st instanceof Set)) st = new Set();
+    if (e.target.checked) st.add(val); else st.delete(val);
+    if (st.size === all.length) st = '*';
+  }
+  filterStates.set(idx, st);
+  updateCnt(idx, vf.values);
+}
+
+// ── Кнопка "Все" у конкретного фильтра ───────────────────────────────────────
+$id('fgrid').addEventListener('click', e => {
+  if (!e.target.classList.contains('fbox-all')) return;
+  const idx = parseInt(e.target.dataset.idx);
+  selAllIdx(idx);
+});
+
+// ── Поиск ─────────────────────────────────────────────────────────────────────
+$id('fgrid').addEventListener('input', e => {
+  if (e.target.tagName !== 'INPUT' || e.target.type !== 'text') return;
+  const idx = parseInt(e.target.dataset.idx);
+  const vf  = getVF(idx);
+  if (!vf) return;
+  buildList(idx, vf.values, e.target.value);
+});
+
+function selAllIdx(idx){
+  filterStates.set(idx, '*');
+  const vf = getVF(idx);
+  if (!vf) return;
+  buildList(idx, vf.values, '');
+  // сбросить поисковую строку
+  const box = $id('fgrid').querySelector('[data-idx="' + idx + '"][type=text]');
+  if (box) box.value = '';
+}
+
+function clrIdx(idx){
+  filterStates.set(idx, new Set());
+  const vf = getVF(idx);
+  if (!vf) return;
+  buildList(idx, vf.values, '');
+  const box = $id('fgrid').querySelector('[data-idx="' + idx + '"][type=text]');
+  if (box) box.value = '';
+}
+
+// ── Load indicator ────────────────────────────────────────────────────────────
+async function loadIndicator(force){
+  const iid = String($id('indId').value).trim();
+  if (!iid){ setStatus('Введите ID','err'); return; }
+
+  $id('btnLoad').disabled = true;
+  $id('btnLoad').textContent = 'Загрузка...';
+  setStatus('Загружаем фильтры через R...','info');
+  enableExport(false);
+  $id('fgrid').innerHTML = '<div style="color:var(--muted);font-size:13px;padding:8px 0">Загрузка...</div>';
+
+  try {
+    const res  = await fetch(API + '/api/indicator/' + iid + (force ? '?force=1' : ''));
+    const data = await res.json();
+    if (data.error){ setStatus('Ошибка: ' + data.error,'err'); return; }
+
+    indicatorData = data;
+    renderFilters(indicatorData);
+
+    const yearFields = (indicatorData.filters||[]).filter(f => YEAR_RE.test(f.field_title));
+    let msg = 'Загружено ' + visibleFilters.length + ' фильтров (индикатор ' + iid + ')';
+    if (yearFields.length) msg += ' | Год: ' + yearFields.map(f=>f.field_title).join(', ') + ' → управляется периодом';
+    setStatus(msg,'ok');
+    enableExport(true);
+  } catch(e){
+    setStatus('Ошибка подключения: ' + e.message,'err');
+    $id('fgrid').innerHTML = '<div style="color:var(--faint);padding:8px 0">Убедитесь что запущен emiss_proxy.py</div>';
+  } finally {
+    $id('btnLoad').disabled = false;
+    $id('btnLoad').textContent = '↓ Загрузить фильтры';
+  }
+}
+
+$id('btnLoad').addEventListener('click',    () => loadIndicator(false));
+$id('btnRefresh').addEventListener('click', () => loadIndicator(true));
+
+document.querySelectorAll('.chip').forEach(c => c.addEventListener('click', () => {
+  $id('yearFrom').value = c.dataset.from;
+  $id('yearTo').value   = c.dataset.to === 'today' ? new Date().getFullYear() : c.dataset.to;
+}));
+
+$id('btnSelAll').addEventListener('click', () => visibleFilters.forEach(vf => selAllIdx(vf.idx)));
+$id('btnClrAll').addEventListener('click', () => visibleFilters.forEach(vf => clrIdx(vf.idx)));
+
+$id('btnCopy').addEventListener('click', () => {
+  const cfg = buildConfig(); if (!cfg) return;
+  navigator.clipboard.writeText(JSON.stringify(cfg, null, 2)).then(() => {
+    $id('btnCopy').textContent = '✓ Скопировано';
+    setTimeout(() => $id('btnCopy').textContent = '📋 Копировать конфиг', 2000);
+  });
+});
+
+$id('btnJson').addEventListener('click', () => {
+  const cfg = buildConfig(); if (!cfg) return;
+  $id('jsonPre').textContent = JSON.stringify(cfg, null, 2);
+  const p = $id('jsonPanel'); p.classList.toggle('open');
+  $id('btnJson').textContent = p.classList.contains('open') ? '{ } Скрыть' : '{ } JSON';
+});
+
+$id('btnSave').addEventListener('click', () => {
+  $id('presetName').value = 'config_' + $id('indId').value;
+  $id('modalBg').classList.add('open');
+});
+$id('modalCancel').addEventListener('click', () => $id('modalBg').classList.remove('open'));
+$id('modalOk').addEventListener('click', async () => {
+  const cfg = buildConfig(); if (!cfg) return;
+  $id('modalBg').classList.remove('open');
+  try {
+    const r = await fetch(API + '/api/save_config', {
+      method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(cfg)
+    });
+    const d = await r.json();
+    setStatus(d.error ? 'Ошибка: '+d.error : 'Конфиг сохранён: '+d.saved, d.error?'err':'ok');
+  } catch(e){ setStatus('Ошибка: '+e.message,'err'); }
+});
+
+$id('btnDl').addEventListener('click', async () => {
+  const cfg = buildConfig(); if (!cfg) return;
+  const btn = $id('btnDl');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Загружаем...';
+  setStatus('R загружает данные — подождите 30–120 сек...','info');
+
+  try {
+    const res = await fetch(API + '/api/download', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({indicator_id: cfg.indicator_id, config: cfg})
+    });
+    if (!res.ok){
+      const err = await res.json().catch(() => ({error: res.statusText}));
+      setStatus('Ошибка R: '+(err.error||res.statusText),'err'); return;
+    }
+    const blob = await res.blob();
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'emiss_' + cfg.indicator_id + '.csv';
+    a.click();
+    URL.revokeObjectURL(a.href);
+    setStatus('Готово! Скачано ' + (blob.size/1024).toFixed(1) + ' КБ','ok');
+  } catch(e){
+    setStatus('Ошибка: '+e.message,'err');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '↓ Скачать CSV';
+  }
+});
+</script>
+</body>
+</html>
