@@ -133,7 +133,8 @@ Rscript -e 'install.packages(
 <details>
 <summary>🪟 Windows</summary>
 
-Запустите в PowerShell или CMD:
+Скачивание может не работать, пока вы находитесь в РФ. Можете попробовать сменить локацию.
+Запустите в PowerShell или CMD от имени администратора:
 
 ```cmd
 Rscript -e "install.packages(c('fedstatAPIr', 'data.table', 'jsonlite'), repos='https://cloud.r-project.org')"
