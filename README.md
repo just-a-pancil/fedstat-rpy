@@ -82,6 +82,40 @@ R --version
 ```
 
 </details>
+<details>
+<summary>🍎 macOS</summary>
+
+**Способ 1 — официальный установщик (рекомендуется):**
+
+1. Скачайте `.pkg`-установщик с [cran.r-project.org](https://cran.r-project.org/bin/macosx/)
+2. Запустите файл и следуйте инструкциям
+3. Для ARM-чипов (M1/M2/M3) скачивайте сборку `arm64`; для Intel — `x86_64`
+
+**Способ 2 — через Homebrew:**
+
+```bash
+brew install --cask r
+```
+
+> Если Homebrew не установлен, сначала установите его:
+> ```bash
+> /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+> ```
+
+Проверьте версию:
+
+```bash
+R --version
+# R version 4.x.x (2024-...) ...
+```
+
+> Если команда не найдена после установки через `.pkg`, добавьте R в PATH вручную:
+> ```bash
+> echo 'export PATH="/Library/Frameworks/R.framework/Resources/bin:$PATH"' >> ~/.zshrc
+> source ~/.zshrc
+> ```
+
+</details>
 
 <details>
 <summary>🪟 Windows</summary>
@@ -129,6 +163,19 @@ Rscript -e 'install.packages(
   repos = "https://cloud.r-project.org"
 )'
 ```
+
+</details>
+<details>
+<summary>🍎 macOS</summary>
+
+```bash
+Rscript -e 'install.packages(
+  c("fedstatAPIr", "data.table", "jsonlite"),
+  repos = "https://cloud.r-project.org"
+)'
+```
+
+> На macOS при первой установке система может запросить согласие на компиляцию пакетов из исходников — ответьте `no`, чтобы использовать готовые бинарники (быстрее).
 
 </details>
 
@@ -181,8 +228,28 @@ python3 --version
 > Если на системе несколько Python — используйте явно `python3`, не `python`.
 
 </details>
+<details>
+<summary>🍎 macOS</summary>
+
+```bash
+python3 --version
+# Python 3.10.x или новее
+```
+
+> На macOS обычно используется `python3`. Команда `python` может вести себя по-разному в зависимости от версии системы.
+
+Если Python не установлен или версия ниже 3.10:
+
+```bash
+brew install python
+```
+
+> Homebrew-версия Python устанавливается в `/opt/homebrew/bin/python3` (Apple Silicon) или `/usr/local/bin/python3` (Intel). Убедитесь, что `python3 --version` показывает актуальную версию.
+
+</details>
 
 <details>
+
 <summary>🪟 Windows</summary>
 
 ```cmd
@@ -203,6 +270,14 @@ python --version
 
 <details>
 <summary>🐧 Linux</summary>
+
+```bash
+python3 emiss_download.py 62309 --list-filters
+```
+
+</details>
+<details>
+<summary>🍎 macOS</summary>
 
 ```bash
 python3 emiss_download.py 62309 --list-filters
@@ -271,7 +346,38 @@ python3 emiss_download.py 62309 config_62309.json -o result.csv
 ```
 
 </details>
+<details>
+<summary>🍎 macOS</summary>
 
+```bash
+# 1. Установить R
+#    Способ 1 — официальный установщик:
+#    Скачайте .pkg с https://cran.r-project.org/bin/macosx/ и запустите.
+#    Для Apple Silicon (M1/M2/M3) выбирайте сборку arm64.
+# Способ 2 — через Homebrew:
+brew install --cask r
+
+# 2. Установить R-пакеты
+Rscript -e 'install.packages(c("fedstatAPIr","data.table","jsonlite"), repos="https://cloud.r-project.org")'
+
+# 3. Запустить конфигуратор — выбрать фильтры в браузере, сохранить конфиг
+python3 emiss_proxy.py
+#  → откроется http://127.0.0.1:8765/
+#  → введите ID индикатора, настройте фильтры, нажмите «Сохранить конфиг»
+#  → файл config_62309.json появится рядом со скриптом
+#  → Ctrl+C чтобы остановить прокси
+
+# 4.1 Скачать данные прямо в конфигураторе
+#  → конфигуратор позволяет скачать данные прямо на странице с фильтрами
+
+# 4.2 Или скачать через CLI
+python3 emiss_download.py 62309 config_62309.json -o result.csv
+
+# 5. Готово
+#  → result.csv содержит данные с ЕМИСС, открывается в Excel без настройки кодировки
+```
+
+</details>
 <details>
 <summary>🪟 Windows</summary>
 
